@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Evalúa tu confianza digital | Igualdad Digital</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Variables de marca Afundación / Igualdad Digital ── */
+    :root {
+      --brand-blue:        #1a5fa8;
+      --brand-blue-dark:   #134a87;
+      --brand-blue-medium: #2272c3;
+      --brand-blue-light:  #e8f2fb;
+      --brand-blue-xlight: #f3f8fd;
+      --brand-gray:        #f7f9fc;
+      --brand-text:        #1a2b3c;
+      --brand-text-muted:  #4a6278;
+      --brand-border:      #d0dde8;
+    }
+
+    body {
+      font-family: 'Montserrat', system-ui, -apple-system, sans-serif;
+      color: var(--brand-text);
+    }
+
+    /* Animaciones */
+    .fade-in { animation: fadeIn 0.4s ease-out; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);} }
+
+    /* Tarjetas de opción */
+    .option-card {
+      transition: all 0.18s ease;
+      cursor: pointer;
+      border: 2px solid var(--brand-border);
+      background: white;
+    }
+    .option-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(26,95,168,0.10);
+      border-color: var(--brand-blue-medium);
+    }
+    .option-card.selected {
+      border-color: var(--brand-blue);
+      background-color: var(--brand-blue-light);
+      box-shadow: 0 0 0 3px rgba(26,95,168,0.15);
+    }
+
+    /* Barra de progreso */
+    .progress-bar {
+      background: linear-gradient(90deg, var(--brand-blue) 0%, var(--brand-blue-medium) 100%);
+      transition: width 0.4s ease;
+    }
+
+    /* Transiciones — solo opacidad, sin movimiento vertical para evitar saltos */
+    .question-transition-out { animation: qOut 0.15s ease-in forwards; }
+    @keyframes qOut { from{opacity:1;} to{opacity:0;} }
+
+    .question-transition-in { animation: qIn 0.22s ease-out; }
+    @keyframes qIn { from{opacity:0;} to{opacity:1;} }
+
+    .advance-pop { /* sin animación de escala */ }
+
+    /* Selección dispositivo */
+    .device-pop { animation: devicePop 240ms ease-out; }
+    @keyframes devicePop { 0%{transform:scale(1);}60%{transform:scale(1.03);}100%{transform:scale(1);} }
+    .device-selected-indicator { opacity:0; transform:translateY(3px); transition: all 200ms ease; }
+    .option-card.selected .device-selected-indicator { opacity:1; transform:translateY(0); }
+
+    /* Botones de marca */
+    .btn-brand {
+      background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-medium) 100%);
+      color: white;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(26,95,168,0.25);
+    }
+    .btn-brand:hover {
+      background: linear-gradient(135deg, var(--brand-blue-dark) 0%, var(--brand-blue) 100%);
+      box-shadow: 0 6px 18px rgba(26,95,168,0.35);
+      transform: translateY(-1px);
+    }
+    .btn-brand:disabled {
+      background: #b0c8e4;
+      box-shadow: none;
+      transform: none;
+      cursor: not-allowed;
+    }
+
+    /* Tarjeta primer paso */
+    .first-step-card {
+      background: linear-gradient(135deg, var(--brand-blue) 0%, var(--brand-blue-medium) 100%);
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-shadow: 0 8px 24px rgba(26,95,168,0.25);
+    }
+
+    /* Tarjetas de curso */
+    .course-card {
+      background: white;
+      border: 1.5px solid var(--brand-border);
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: all 0.18s ease;
+      text-decoration: none;
+      display: block;
+      color: var(--brand-text);
+    }
+    .course-card:hover {
+      box-shadow: 0 8px 22px rgba(26,95,168,0.12);
+      transform: translateY(-2px);
+      border-color: var(--brand-blue-medium);
+    }
+    .course-img-container { width:100%; height:116px; overflow:hidden; position:relative; }
+    .course-img-container img { width:100%; height:100%; object-fit:cover; }
+    .course-img-fallback { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2.8rem; }
+
+  </style>
+</head>
+
+<body style="background:linear-gradient(135deg,var(--brand-blue-xlight) 0%,#dce9f5 100%);min-height:100vh;">
+
+<!-- ════════════════════════════════════
+     PANTALLA DE BIENVENIDA
+════════════════════════════════════ -->
+<div id="welcomeScreen" class="container mx-auto px-4 py-8 max-w-4xl">
+  <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 fade-in" style="border:1px solid var(--brand-border);">
+
+    <!-- Logo — mayor presencia -->
+    <div class="flex justify-center mb-8">
+      <img src="logo_afundacion_transp.png" alt="Afundación Obra Social ABANCA" class="h-20 md:h-24">
+    </div>
+
+    <!-- Título — sin negrita, azul corporativo -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-normal mb-4" style="color:var(--brand-blue);">Evalúa tu confianza digital</h1>
+      <div class="w-24 h-1 mx-auto mb-6 rounded-full" style="background:var(--brand-blue);"></div>
+      <p class="text-lg mb-4" style="color:var(--brand-text);">
+        Este sencillo test del programa <strong>Igualdad Digital</strong> te permitirá evaluar tu nivel de confianza a la hora de usar la tecnología y te ofrecerá un plan personalizado para avanzar paso a paso.
+      </p>
+      <p style="color:var(--brand-text-muted);">No es un examen. Todas las respuestas son válidas.</p>
+    </div>
+
+    <!-- Selección de dispositivo -->
+    <div class="rounded-2xl p-6 mb-8" style="background:var(--brand-blue-xlight);border:1px solid var(--brand-border);">
+      <h2 class="text-lg font-semibold mb-2" style="color:var(--brand-blue-dark);">📱 ¿Qué dispositivo utilizas?</h2>
+      <p class="text-sm mb-4" style="color:var(--brand-text-muted);">Así podremos recomendarte el curso más adecuado.</p>
+
+      <div class="grid grid-cols-1 gap-3" id="deviceOptions">
+
+        <!-- Android -->
+        <button type="button" class="option-card rounded-xl p-4 text-left" onclick="selectDevice('android')" id="device-android">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 w-11 h-11 flex items-center justify-center">
+              <svg viewBox="0 0 44 44" class="w-11 h-11" aria-hidden="true">
+                <rect width="44" height="44" rx="10" fill="#e8f5e9"/>
+                <path fill="#3DDC84" d="M15.2 18.3 13.8 16.1c-.2-.3-.1-.7.2-.9.3-.2.7-.1.9.2l1.4 2.2c.8-.3 1.7-.5 2.7-.5s1.9.2 2.7.5l1.4-2.2c.2-.3.6-.4.9-.2.3.2.4.6.2.9l-1.4 2.2c1.6.9 2.7 2.5 2.9 4.4H12.3c.2-1.9 1.3-3.5 2.9-4.4z"/>
+                <path fill="#3DDC84" d="M13 23.5h18v6.2c0 1.2-1 2.3-2.3 2.3H15.3C14 32 13 30.9 13 29.7v-6.2z"/>
+                <circle cx="17.2" cy="21.2" r="0.9" fill="#fff"/>
+                <circle cx="26.8" cy="21.2" r="0.9" fill="#fff"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold" style="color:var(--brand-text);">Android</div>
+              <div class="text-sm" style="color:var(--brand-text-muted);">Samsung, Xiaomi, Huawei, etc.</div>
+            </div>
+            <div class="device-selected-indicator font-bold text-lg" style="color:var(--brand-blue);">✓</div>
+          </div>
+        </button>
+
+        <!-- iPhone -->
+        <button type="button" class="option-card rounded-xl p-4 text-left" onclick="selectDevice('ios')" id="device-ios">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 w-11 h-11 flex items-center justify-center">
+              <svg viewBox="0 0 44 44" class="w-11 h-11" aria-hidden="true">
+                <rect width="44" height="44" rx="10" fill="#f0f0f0"/>
+                <path fill="#1d1d1f" d="M27.9 21.1c0 2.6 2.3 3.5 2.3 3.6 0 .1-.4 1.3-1.3 2.6-.8 1.1-1.7 2.2-3.1 2.2-1.3 0-1.7-.8-3.2-.8-1.4 0-2 .8-3.2.8-1.3 0-2.3-1.2-3.1-2.3-1.7-2.4-3-6.7-1.3-9.6.8-1.4 2.2-2.3 3.8-2.3 1.2 0 2.3.8 3.2.8.9 0 2.3-.9 3.9-.8.7 0 2.6.3 3.8 2-.1.1-2.2 1.3-2.2 3.8z"/>
+                <path fill="#1d1d1f" d="M25.9 12.2c.7-.9 1.2-2.1 1.1-3.3-1 0-2.2.7-2.9 1.6-.6.7-1.2 2-1 3.1 1.1.1 2.2-.6 2.8-1.4z"/>
+              </svg>
+            </div>
+            <div class="flex-1">
+              <div class="font-semibold" style="color:var(--brand-text);">iPhone (iOS)</div>
+              <div class="text-sm" style="color:var(--brand-text-muted);">Apple</div>
+            </div>
+            <div class="device-selected-indicator font-bold text-lg" style="color:var(--brand-blue);">✓</div>
+          </div>
+        </button>
+
+        <!-- No lo sé -->
+        <button type="button" class="option-card rounded-xl p-4 text-left" onclick="selectDevice('unknown')" id="device-unknown">
+          <div class="flex items-center gap-4">
+            <div class="flex-shrink-0 w-11 h-11 flex items-center justify-center rounded-xl text-2xl" style="background:#f0f4f8;">❓</div>
+            <div class="flex-1">
+              <div class="font-semibold" style="color:var(--brand-text);">No lo sé</div>
+              <div class="text-sm" style="color:var(--brand-text-muted);">No pasa nada, te guiaremos igual</div>
+            </div>
+            <div class="device-selected-indicator font-bold text-lg" style="color:var(--brand-blue);">✓</div>
+          </div>
+        </button>
+
+      </div>
+    </div>
+
+    <!-- Duración -->
+    <div class="rounded-2xl p-5 mb-8" style="background:var(--brand-blue-xlight);border:1px solid var(--brand-border);">
+      <div class="flex items-start gap-3">
+        <div class="text-2xl">🕒</div>
+        <div>
+          <p class="font-semibold" style="color:var(--brand-text);">Duración estimada: 3–5 minutos</p>
+          <p class="text-sm" style="color:var(--brand-text-muted);">Responde pensando en tu autonomía actual (sin prisas).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón -->
+    <div class="text-center">
+      <button id="startBtn" onclick="startTest()" disabled
+              class="btn-brand font-semibold py-4 px-10 rounded-full text-lg">
+        Comenzar el Test →
+      </button>
+      <p id="startHint" class="text-sm mt-3" style="color:var(--brand-text-muted);">Selecciona tu dispositivo para empezar.</p>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     PANTALLA DEL TEST
+════════════════════════════════════ -->
+<div id="testScreen" class="container mx-auto px-4 py-8 max-w-4xl hidden">
+  <div id="testCard" class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 fade-in" style="border:1px solid var(--brand-border);">
+
+    <!-- Logo — consistente con bienvenida -->
+    <div class="flex justify-center mb-6">
+      <img src="logo_afundacion_transp.png" alt="Afundación Obra Social ABANCA" class="h-16 md:h-20">
+    </div>
+
+    <!-- Progreso — solo porcentaje, sin "X de Y" -->
+    <div class="mb-8">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-sm font-semibold" style="color:var(--brand-text-muted);">Tu progreso</span>
+        <span id="progressPercent" class="text-sm font-bold" style="color:var(--brand-blue);">0%</span>
+      </div>
+      <div class="w-full rounded-full h-3" style="background:#dce8f4;">
+        <div id="progressBar" class="progress-bar h-3 rounded-full" style="width:0%;"></div>
+      </div>
+    </div>
+
+    <!-- Icono + Texto pregunta -->
+    <div class="flex items-start gap-5 mb-7">
+      <div id="questionIconWrapper" class="w-20 h-20 rounded-2xl flex items-center justify-center shrink-0" style="background:var(--brand-blue-light);">
+        <div id="questionIcon" class="w-12 h-12" style="color:var(--brand-blue);"></div>
+      </div>
+      <h2 id="questionText" class="text-2xl md:text-3xl font-semibold leading-snug mt-1" style="color:var(--brand-text);"></h2>
+    </div>
+
+    <!-- Opciones -->
+    <div id="optionsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6"></div>
+
+    <!-- Botones de navegación -->
+    <div class="flex justify-between mt-8">
+      <button id="prevBtn" onclick="previousQuestion()"
+              class="font-semibold py-3 px-6 rounded-lg transition-all"
+              style="background:#e8edf3;color:var(--brand-text);"
+              disabled>
+        ← Anterior
+      </button>
+      <button id="nextBtn" onclick="nextQuestion()"
+              class="btn-brand font-semibold py-3 px-8 rounded-lg"
+              disabled>
+        Siguiente →
+      </button>
+      <button id="finishBtn" onclick="finishTest()"
+              class="btn-brand font-semibold py-3 px-8 rounded-lg hidden">
+        ✓ Finalizar
+      </button>
+    </div>
+
+    <p class="text-sm mt-5" style="color:#8fa8c0;">
+      Al responder, avanzaremos automáticamente. Puedes usar "Anterior" si quieres cambiar tu respuesta.
+    </p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     PANTALLA DE RESULTADOS
+════════════════════════════════════ -->
+<div id="resultsScreen" class="container mx-auto px-4 py-8 max-w-5xl hidden">
+  <div class="bg-white rounded-3xl shadow-2xl p-6 md:p-10 fade-in" style="border:1px solid var(--brand-border);">
+
+    <!-- Logo — mayor presencia -->
+    <div class="flex justify-center mb-8">
+      <img src="logo_afundacion_transp.png" alt="Afundación Obra Social ABANCA" class="h-20 md:h-24">
+    </div>
+
+    <!-- Título — sin negrita, azul corporativo -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl md:text-5xl font-normal mb-4" style="color:var(--brand-blue);">🎉 Tus resultados</h1>
+      <p id="resultsIntro" class="text-xl" style="color:var(--brand-text-muted);">Has completado el test. Aquí tienes tu plan personalizado.</p>
+    </div>
+
+    <!-- Donut -->
+    <div class="rounded-2xl p-8 text-white text-center mb-10"
+         style="background:linear-gradient(135deg,var(--brand-blue-dark) 0%,var(--brand-blue-medium) 100%);">
+      <div id="donutContainer" class="flex justify-center"></div>
+      <p id="levelTitle" class="text-2xl font-semibold mt-4"></p>
+      <p id="levelDescription" class="text-lg mt-2" style="opacity:0.92;"></p>
+    </div>
+
+    <!-- Primer paso destacado -->
+    <div id="firstStepSection" class="mb-10 hidden">
+      <h2 class="text-2xl font-normal mb-4" style="color:var(--brand-blue);">🚀 Tu primer paso recomendado</h2>
+      <div id="firstStepCard"></div>
+    </div>
+
+    <!-- Áreas clave -->
+    <div class="mb-10">
+      <h2 class="text-2xl font-normal mb-2" style="color:var(--brand-blue);">📊 Tus áreas clave</h2>
+      <p class="mb-5" style="color:var(--brand-text-muted);">Estas barras resumen tu competencia en 5 áreas (no son un examen). Las más bajas indican por dónde empezar.</p>
+      <div id="themeBars" class="space-y-4"></div>
+    </div>
+
+    <!-- Plan completo -->
+    <div class="mb-10">
+      <h2 class="text-2xl font-normal mb-2" style="color:var(--brand-blue);">🧭 Tu plan completo</h2>
+      <p class="mb-6" style="color:var(--brand-text-muted);">Te recomendamos estos cursos para reforzar tu confianza digital y avanzar a tu ritmo.</p>
+      <div id="planContainer" class="space-y-6"></div>
+
+      <!-- CTA — solo "Ir a Igualdad Digital" -->
+      <div class="mt-8 p-6 rounded-2xl" style="background:var(--brand-blue-xlight);border:1px solid var(--brand-border);">
+        <h3 class="text-lg font-semibold mb-2" style="color:var(--brand-blue-dark);">👉 Explora Igualdad Digital</h3>
+        <p class="mb-4" style="color:var(--brand-text);">Accede a los cursos, guarda tu progreso y aprende paso a paso.</p>
+        <div class="flex justify-center">
+          <a href="https://aulavirtual.afundacion.org/igualdad-digital/" target="_blank"
+             class="btn-brand inline-flex items-center justify-center font-semibold py-3 px-7 rounded-xl">
+            Ir a Igualdad Digital →
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repetir -->
+    <div class="text-center">
+      <button onclick="resetTest()" class="btn-brand font-semibold py-4 px-8 rounded-full text-lg">
+        🔄 Repetir el Test
+      </button>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+  // ── Selección de dispositivo ──
+  let deviceType = null;
+  function selectDevice(type) {
+    deviceType = type;
+    ["android","ios","unknown"].forEach(t => {
+      const el = document.getElementById(`device-${t}`);
+      if (el) el.classList.remove("selected","device-pop");
+    });
+    const sel = document.getElementById(`device-${type}`);
+    if (sel) { sel.classList.add("selected","device-pop"); setTimeout(()=>sel.classList.remove("device-pop"),280); }
+    const btn = document.getElementById("startBtn");
+    if (btn) btn.disabled = false;
+    const hint = document.getElementById("startHint");
+    if (hint) hint.textContent = "Listo. Puedes comenzar el test.";
+  }
+
+  // ── Estado ──
+  let currentQuestionIndex = 0;
+  let answers = [];
+
+  // Auto-avance: más rápido y suave
+  const AUTO_ADVANCE = true;
+  const AUTO_ADVANCE_DELAY_MS = 380;
+
+  // ── Áreas temáticas ──
+  const THEME = {
+    MOBILE:   "Uso del móvil",
+    COMM:     "Comunicación",
+    SERVICES: "Trámites y servicios",
+    SECURITY: "Seguridad digital",
+    FINANCE:  "Finanzas digitales"
+  };
+
+  // ── Colores por módulo para el icono ──
+  const MODULE_COLORS = {
+    0:{bg:"#dbeafe",icon:"#2563eb"},
+    1:{bg:"#ede9fe",icon:"#7c3aed"},
+    2:{bg:"#fce7f3",icon:"#be185d"},
+    3:{bg:"#d1fae5",icon:"#065f46"},
+    4:{bg:"#dcfce7",icon:"#16a34a"},
+    5:{bg:"#fee2e2",icon:"#dc2626"},
+    6:{bg:"#fef3c7",icon:"#b45309"},
+    7:{bg:"#e0e7ff",icon:"#4338ca"}
+  };
+
+  // ── Iconos mejorados (filled, coloreados por módulo) ──
+  const ICONS = {
+    touch:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M9 11V7a3 3 0 016 0v4h1a2 2 0 012 2v5a2 2 0 01-2 2H8a2 2 0 01-2-2v-5a2 2 0 012-2h1zm2-4a1 1 0 012 0v4h-2V7z"/></svg>`,
+    wifi:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 18a2 2 0 100-4 2 2 0 000 4zm-4.24-3.53a6 6 0 018.48 0l-1.42 1.42a4 4 0 00-5.66 0L7.76 14.47zm-2.83-2.83a10 10 0 0114.14 0l-1.41 1.41a8 8 0 00-11.32 0L4.93 11.64zM2.1 8.81a14 14 0 0119.8 0l-1.41 1.42a12 12 0 00-16.97 0L2.1 8.81z"/></svg>`,
+    settings:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 14a2 2 0 100-4 2 2 0 000 4zm7.94-1.5a8 8 0 01.06 1l1.76 1.36a.5.5 0 01.12.63l-1.68 2.9a.5.5 0 01-.6.22l-2.07-.83a7.5 7.5 0 01-1.72 1l-.31 2.2a.5.5 0 01-.5.44h-3.36a.5.5 0 01-.5-.43l-.31-2.2a7.5 7.5 0 01-1.72-1l-2.07.83a.5.5 0 01-.6-.22l-1.68-2.9a.49.49 0 01.12-.63l1.76-1.36a7.8 7.8 0 010-2l-1.76-1.37a.5.5 0 01-.12-.63l1.68-2.9a.5.5 0 01.6-.22l2.07.83a7.5 7.5 0 011.72-1l.31-2.2A.5.5 0 0110.5 4H15a.5.5 0 01.5.43l.31 2.2a7.5 7.5 0 011.72 1l2.07-.83a.5.5 0 01.6.22l1.68 2.9a.49.49 0 01-.12.63l-1.76 1.36c.04.33.06.66.06 1l-.12.59z"/></svg>`,
+    download:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 2a1 1 0 011 1v8.59l2.3-2.3a1 1 0 111.41 1.42l-4 4a1 1 0 01-1.42 0l-4-4A1 1 0 018.7 9.3L11 11.6V3a1 1 0 011-1zM5 20a1 1 0 011-1h12a1 1 0 010 2H6a1 1 0 01-1-1z"/></svg>`,
+    media:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/></svg>`,
+    map:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 2a7 7 0 00-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 00-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>`,
+    appointment:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M17 3h-1V1h-2v2H10V1H8v2H7a2 2 0 00-2 2v16a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2zM7 19V9h10v10H7zm3.29-4.29l3.59-3.59 1.41 1.38-5 5-2.59-2.59 1.41-1.41 1.18 1.21z"/></svg>`,
+    portal:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zM4 8h16v2H4V8zm0 4h10v2H4v-2zm0 4h7v2H4v-2z"/></svg>`,
+    chat:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M20 2H4a2 2 0 00-2 2v13a2 2 0 002 2h3l3 3 3-3h7a2 2 0 002-2V4a2 2 0 00-2-2zM7 11a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm5 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm5 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3z"/></svg>`,
+    video:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M17 10.5V7a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h12a1 1 0 001-1v-3.5l4 4v-11l-4 4z"/></svg>`,
+    scam:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10h-1V7h2v4h-1zm0 4h-1v-2h2v2h-1z"/></svg>`,
+    password:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M18 8h-1V6A5 5 0 007 6v2H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2zm-6 9a2 2 0 110-4 2 2 0 010 4zm3.1-9H8.9V6a3.1 3.1 0 116.2 0v2z"/></svg>`,
+    banking:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M4 10h3v7H4v-7zm6.5 0h3v7h-3v-7zM2 19h20v3H2v-3zM17 10h3v7h-3v-7zM12 1L2 6v2h20V6L12 1zm0 4a1 1 0 110-2 1 1 0 010 2z"/></svg>`,
+    transfer:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M7 16V4l-5 5H0l7-7 7 7h-2l-5-5v12H7zm10-8v12h2V8l5 5h2l-7-7-7 7h2l5-5z"/></svg>`,
+    ai:`<svg viewBox="0 0 24 24" fill="currentColor" class="w-12 h-12"><path d="M12 2a2 2 0 012 2v1h3a2 2 0 012 2v3h1a1 1 0 010 2h-1v3a2 2 0 01-2 2h-3v1a2 2 0 01-4 0v-1H7a2 2 0 01-2-2v-3H4a1 1 0 010-2h1V7a2 2 0 012-2h3V4a2 2 0 012-2zm-2 9a1 1 0 100 2 1 1 0 000-2zm4 0a1 1 0 100 2 1 1 0 000-2z"/></svg>`
+  };
+  function iconSvg(key) { return ICONS[key] || ICONS.chat; }
+
+  // ── Ponderación ──
+  const moduleWeights = {0:1.3,1:1.1,2:0.9,3:1.3,4:1.0,5:1.4,6:1.3,7:0.7};
+
+  // ── Cursos ──
+  const courses = [
+    {module:0,name:"Teléfonos móviles Android: empezando desde cero",duration:"3h",url:"https://aulavirtual.afundacion.org/producto/telefono-movil-android-empezando-desde-cero/",devices:["android"]},
+    {module:0,name:"Teléfonos móviles iOS: empezando desde cero",duration:"3h",url:"https://aulavirtual.afundacion.org/producto/empezando_desde_cero/",devices:["ios"]},
+    {module:0,name:"Empezando desde cero con tu móvil",duration:"3h",url:"https://aulavirtual.afundacion.org/igualdad-digital/",devices:["unknown"]},
+
+    {module:1,name:"Tu día a día con el móvil Android: tu mejor aliado",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/tu-dia-a-dia-con-el-movil-android-tu-mejor-aliado/",devices:["android"]},
+    {module:1,name:"Tu día a día con el móvil iOS: tu mejor aliado",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/tu-dia-a-dia-con-el-movil-ios/",devices:["ios"]},
+    {module:1,name:"Tu día a día con el móvil: tu mejor aliado",duration:"2h",url:"https://aulavirtual.afundacion.org/igualdad-digital/",devices:["unknown"]},
+
+    {module:2,name:"Aplicaciones Android de ocio y bienestar",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/aplicaciones-android-de-ocio-y-bienestar/",devices:["android"]},
+    {module:2,name:"Aplicaciones iOS de ocio y bienestar",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/aplicaciones-ios-de-ocio-y-bienestar/",devices:["ios"]},
+    {module:2,name:"Aplicaciones de ocio y bienestar",duration:"2h",url:"https://aulavirtual.afundacion.org/igualdad-digital/",devices:["unknown"]},
+
+    {module:3,name:"Trámites con la administración",duration:"3h",url:"https://aulavirtual.afundacion.org/producto/tramites-con-la-administracion-para-ios-y-android/",devices:["android","ios","unknown"]},
+
+    {module:4,name:"WhatsApp y otras redes sociales (Android)",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/whatsapp-y-otras-redes-sociales-para-android/",devices:["android"]},
+    {module:4,name:"WhatsApp y otras redes sociales (iOS)",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/whatsapp-y-otras-redes-sociales-para-ios/",devices:["ios"]},
+    {module:4,name:"WhatsApp y otras redes sociales",duration:"2h",url:"https://aulavirtual.afundacion.org/igualdad-digital/",devices:["unknown"]},
+
+    {module:5,name:"Ciberseguridad",duration:"4h",url:"https://aulavirtual.afundacion.org/producto/ciberseguridad/",devices:["android","ios","unknown"]},
+    {module:5,name:"Recomendaciones de la Policía",duration:"1h",url:"https://aulavirtual.afundacion.org/producto/recomendaciones-de-la-policia/",devices:["android","ios","unknown"]},
+
+    {module:6,name:"Aprende a utilizar la banca móvil y los cajeros de ABANCA",duration:"2h",url:"https://aulavirtual.afundacion.org/producto/aprende-a-utilizar-la-banca-movil-de-abanca/",devices:["android","ios","unknown"]},
+
+    {module:7,name:"Inteligencia artificial con ChatGPT",duration:"3h",url:"https://aulavirtual.afundacion.org/igualdad-digital/",devices:["android","ios","unknown"]}
+  ];
+
+  const MODULE_EMOJI = {0:"📱",1:"🤳",2:"🎵",3:"🏛️",4:"💬",5:"🔒",6:"💳",7:"🤖"};
+  const MODULE_BG    = {0:"#dbeafe",1:"#ede9fe",2:"#fce7f3",3:"#d1fae5",4:"#dcfce7",5:"#fee2e2",6:"#fef3c7",7:"#e0e7ff"};
+
+  // ── Opciones de respuesta ──
+  function getOptions() {
+    return [
+      {text:"No sé hacerlo",                                   value:0,icon:"❌",bg:"#fee2e2",color:"#dc2626"},
+      {text:"Solo podría hacerlo con ayuda",                   value:1,icon:"🤔",bg:"#fef3c7",color:"#b45309"},
+      {text:"Puedo hacerlo, aunque tengo dudas",               value:2,icon:"👍",bg:"#d1fae5",color:"#065f46"},
+      {text:"Sí, sé hacerlo con seguridad y autonomía",        value:3,icon:"⭐",bg:"#dbeafe",color:"#1d4ed8"}
+    ];
+  }
+
+  const moduleTitles = {
+    0:"Empezando desde cero",1:"Tu mejor aliado",2:"Aplicaciones útiles",
+    3:"Trámites con la administración",4:"WhatsApp y redes sociales",
+    5:"Ciberseguridad",6:"Cajeros y banca móvil",7:"Inteligencia artificial (ChatGPT)"
+  };
+  const moduleOrder = [0,1,4,2,3,5,6,7];
+
+  // ── 16 preguntas (2 por módulo, las más diagnósticas) ──
+  const questions = [
+    {module:0,theme:THEME.MOBILE,   iconKey:"touch",       question:"Moverte por la pantalla táctil de tu móvil (tocar, deslizar, ampliar).",                              options:getOptions()},
+    {module:0,theme:THEME.MOBILE,   iconKey:"wifi",        question:"Conectarte a Internet desde el móvil (WiFi o datos móviles).",                                       options:getOptions()},
+    {module:1,theme:THEME.MOBILE,   iconKey:"settings",    question:"Cambiar ajustes del móvil (letra, volumen, brillo) cuando lo necesitas.",                            options:getOptions()},
+    {module:1,theme:THEME.MOBILE,   iconKey:"download",    question:"Descargar e instalar una aplicación nueva.",                                                         options:getOptions()},
+    {module:2,theme:THEME.MOBILE,   iconKey:"media",       question:"Usar aplicaciones de ocio (música, radio o vídeos).",                                                options:getOptions()},
+    {module:2,theme:THEME.MOBILE,   iconKey:"map",         question:"Utilizar una app de mapas para orientarte o llegar a un sitio.",                                     options:getOptions()},
+    {module:3,theme:THEME.SERVICES, iconKey:"appointment", question:"Pedir una cita (médica u otra) por Internet desde el móvil.",                                        options:getOptions()},
+    {module:3,theme:THEME.SERVICES, iconKey:"portal",      question:"Acceder a una página o aplicación oficial para hacer un trámite.",                                   options:getOptions()},
+    {module:4,theme:THEME.COMM,     iconKey:"chat",        question:"Enviar y responder mensajes por WhatsApp.",                                                          options:getOptions()},
+    {module:4,theme:THEME.COMM,     iconKey:"video",       question:"Realizar una videollamada.",                                                                         options:getOptions()},
+    {module:5,theme:THEME.SECURITY, iconKey:"scam",        question:"Detectar mensajes sospechosos o posibles estafas antes de pinchar.",                                 options:getOptions()},
+    {module:5,theme:THEME.SECURITY, iconKey:"password",    question:"Crear y usar contraseñas seguras (y diferentes) para tus cuentas.",                                 options:getOptions()},
+    {module:6,theme:THEME.FINANCE,  iconKey:"banking",     question:"Consultar movimientos o realizar operaciones desde la banca móvil.",                                options:getOptions()},
+    {module:6,theme:THEME.FINANCE,  iconKey:"transfer",    question:"Enviar dinero (transferencia o Bizum) desde el móvil.",                                              options:getOptions()},
+    {module:7,theme:null,           iconKey:"ai",          question:"Utilizar una herramienta de inteligencia artificial (como ChatGPT).",                                options:getOptions()},
+    {module:7,theme:null,           iconKey:"ai",          question:"Formular una pregunta clara para obtener una respuesta útil de una herramienta de IA.",              options:getOptions()},
+  ];
+
+  // ── Arrancar test ──
+  function startTest() {
+    if (!deviceType) return;
+    answers = new Array(questions.length).fill(null);
+    currentQuestionIndex = 0;
+    document.getElementById("welcomeScreen").classList.add("hidden");
+    document.getElementById("testScreen").classList.remove("hidden");
+    renderQuestion(true);
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function previousQuestion() {
+    if (currentQuestionIndex <= 0) return;
+    currentQuestionIndex--;
+    renderQuestion(true);
+  }
+
+  function nextQuestion() {
+    if (answers[currentQuestionIndex] === null) return;
+    if (currentQuestionIndex < questions.length - 1) { currentQuestionIndex++; renderQuestion(true); }
+  }
+
+  function finishTest() {
+    if (answers[currentQuestionIndex] === null) return;
+    document.getElementById("testScreen").classList.add("hidden");
+    document.getElementById("resultsScreen").classList.remove("hidden");
+    calculateAndRenderResults();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  function resetTest() {
+    document.getElementById("resultsScreen").classList.add("hidden");
+    document.getElementById("welcomeScreen").classList.remove("hidden");
+    deviceType = null;
+    ["android","ios","unknown"].forEach(t => document.getElementById(`device-${t}`).classList.remove("selected"));
+    document.getElementById("startBtn").disabled = true;
+    document.getElementById("startHint").textContent = "Selecciona tu dispositivo para empezar.";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  // ── Renderizar pregunta ──
+  function renderQuestion(withInAnim=false) {
+    const q   = questions[currentQuestionIndex];
+    const pct = Math.round((currentQuestionIndex / (questions.length - 1)) * 100);
+
+    // Solo porcentaje
+    document.getElementById("progressPercent").textContent = `${pct}%`;
+    document.getElementById("progressBar").style.width = `${pct}%`;
+
+    // Icono coloreado por módulo
+    const mc = MODULE_COLORS[q.module] || {bg:"#dbeafe",icon:"#2563eb"};
+    document.getElementById("questionIconWrapper").style.background = mc.bg;
+    const iconDiv = document.getElementById("questionIcon");
+    iconDiv.style.color   = mc.icon;
+    iconDiv.innerHTML     = iconSvg(q.iconKey);
+    document.getElementById("questionText").textContent = q.question;
+
+    // Opciones — compactas
+    const container = document.getElementById("optionsContainer");
+    container.innerHTML = "";
+    q.options.forEach((opt, idx) => {
+      const isSelected = answers[currentQuestionIndex] === idx;
+      const card = document.createElement("div");
+      card.className = `option-card rounded-xl p-4 flex items-center gap-3 ${isSelected ? "selected" : ""}`;
+      card.style.minHeight = "84px";
+      card.onclick = () => selectOption(idx);
+      card.innerHTML = `
+        <div class="w-10 h-10 rounded-full flex items-center justify-center text-xl shrink-0"
+             style="background:${opt.bg};color:${opt.color};">${opt.icon}</div>
+        <div class="font-medium text-sm leading-snug" style="color:var(--brand-text);">${opt.text}</div>
+      `;
+      container.appendChild(card);
+    });
+
+    // Navegación
+    document.getElementById("prevBtn").disabled = currentQuestionIndex === 0;
+    const isLast = currentQuestionIndex === questions.length - 1;
+    const hasAns = answers[currentQuestionIndex] !== null;
+    document.getElementById("nextBtn").classList.toggle("hidden", isLast);
+    document.getElementById("finishBtn").classList.toggle("hidden", !isLast);
+    document.getElementById("nextBtn").disabled   = !hasAns;
+    document.getElementById("finishBtn").disabled = !hasAns;
+
+    if (withInAnim) {
+      const card = document.getElementById("testCard");
+      card.classList.remove("question-transition-in");
+      void card.offsetWidth;
+      card.classList.add("question-transition-in");
+    }
+  }
+
+  // ── Auto-avance con scroll al top en móvil ──
+  function selectOption(optionIdx) {
+    answers[currentQuestionIndex] = optionIdx;
+    renderQuestion(false);
+    document.getElementById("nextBtn").disabled   = false;
+    document.getElementById("finishBtn").disabled = false;
+
+    const isLast = currentQuestionIndex === questions.length - 1;
+    if (!AUTO_ADVANCE || isLast) return;
+
+    const card = document.getElementById("testCard");
+    card.classList.add("question-transition-out");
+
+    setTimeout(() => {
+      card.classList.remove("question-transition-out");
+      currentQuestionIndex++;
+      renderQuestion(true);
+    }, AUTO_ADVANCE_DELAY_MS);
+  }
+
+  // ── Cálculos ──
+  function computeModuleScores() {
+    const s = {};
+    for (let m=0; m<=7; m++) s[m] = 0;
+    questions.forEach((q,i) => { s[q.module] += answers[i]!==null ? q.options[answers[i]].value : 0; });
+    return s;
+  }
+
+  function computeThemePercents() {
+    const scores={}, maxs={};
+    questions.forEach((q,i) => {
+      if (!q.theme) return;
+      const v = answers[i]!==null ? q.options[answers[i]].value : 0;
+      scores[q.theme] = (scores[q.theme]||0) + v;
+      maxs[q.theme]   = (maxs[q.theme]  ||0) + 3;
+    });
+    return Object.keys(scores)
+      .map(t=>({theme:t,score:scores[t],max:maxs[t],percent:(scores[t]/maxs[t])*100}))
+      .sort((a,b)=>a.percent-b.percent);
+  }
+
+  // Max ponderado con 16 preguntas (2×8 módulos): 6 × 9.0 = 54
+  function computeWeightedIndexPercent(moduleScores) {
+    let w=0;
+    for (const m in moduleScores) w += moduleScores[m] * (moduleWeights[m]||1.0);
+    return Math.max(0, Math.min(100, (w/54)*100));
+  }
+
+  function determineLevel(pct) {
+    if (pct<30) return {title:"🌱 Nivel Inicial",    desc:"Necesitas apoyo frecuente en tareas digitales. Con un plan paso a paso ganarás autonomía rápidamente."};
+    if (pct<50) return {title:"📘 Nivel Básico",     desc:"Ya haces algunas tareas, pero a menudo necesitas ayuda. Consolidar tu base te dará más seguridad."};
+    if (pct<75) return {title:"📗 Nivel Intermedio", desc:"Tienes autonomía en muchas tareas. Reforzar áreas clave te permitirá ganar confianza y seguridad."};
+    return             {title:"🚀 Nivel Avanzado",   desc:"Te manejas con autonomía y seguridad. Puedes ampliar competencias y explorar herramientas más avanzadas."};
+  }
+
+  // Etiqueta ajustada a escala 0–6 (2 preguntas × max 3)
+  function labelForModuleScore(score) {
+    if (score<=1) return {badge:"Necesidad alta",  cls:"bg-red-100 text-red-800 border-red-200"};
+    if (score<=3) return {badge:"Necesidad media", cls:"bg-yellow-100 text-yellow-800 border-yellow-200"};
+    if (score<=5) return {badge:"En progreso",     cls:"bg-blue-100 text-blue-800 border-blue-200"};
+    return               {badge:"Consolidado",     cls:"bg-green-100 text-green-800 border-green-200"};
+  }
+
+  // ── Gráficos ──
+  function renderAnimatedThemeBars(themePercents) {
+    const c = document.getElementById("themeBars");
+    c.innerHTML = "";
+    themePercents.forEach(item => {
+      const barColor = item.percent<40 ? "#dc2626" : item.percent<70 ? "var(--brand-blue)" : "#16a34a";
+      const row = document.createElement("div");
+      row.className = "rounded-2xl p-4";
+      row.style.cssText = "background:var(--brand-blue-xlight);border:1px solid var(--brand-border);";
+      row.innerHTML = `
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="font-semibold" style="color:var(--brand-text);">${escapeHtml(item.theme)}</h3>
+          <span class="text-sm font-bold" style="color:var(--brand-blue);">${Math.round(item.percent)}%</span>
+        </div>
+        <div class="w-full rounded-full h-3 overflow-hidden" style="background:var(--brand-border);">
+          <div class="h-3 rounded-full transition-all duration-700 ease-out" style="width:0%;background:${barColor};"></div>
+        </div>
+        <p class="text-sm mt-2" style="color:var(--brand-text-muted);">${item.score}/${item.max} puntos</p>
+      `;
+      c.appendChild(row);
+      const bar = row.querySelector(".h-3.rounded-full.transition-all");
+      requestAnimationFrame(()=>{ bar.style.width=`${item.percent}%`; });
+    });
+  }
+
+  function renderAnimatedDonut(percent, labelText) {
+    const container=document.getElementById("donutContainer");
+    container.innerHTML="";
+    const size=240,stroke=20,r=(size-stroke)/2,circ=2*Math.PI*r;
+    const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+    svg.setAttribute("width",size);svg.setAttribute("height",size);svg.setAttribute("viewBox",`0 0 ${size} ${size}`);
+
+    const bg=document.createElementNS(svg.namespaceURI,"circle");
+    bg.setAttribute("cx",size/2);bg.setAttribute("cy",size/2);bg.setAttribute("r",r);
+    bg.setAttribute("fill","none");bg.setAttribute("stroke","rgba(255,255,255,0.25)");bg.setAttribute("stroke-width",stroke);
+
+    const fg=document.createElementNS(svg.namespaceURI,"circle");
+    fg.setAttribute("cx",size/2);fg.setAttribute("cy",size/2);fg.setAttribute("r",r);
+    fg.setAttribute("fill","none");fg.setAttribute("stroke","white");fg.setAttribute("stroke-width",stroke);
+    fg.setAttribute("stroke-linecap","round");fg.setAttribute("stroke-dasharray",circ);fg.setAttribute("stroke-dashoffset",circ);
+    fg.style.transition="stroke-dashoffset 900ms ease-out";fg.style.transform="rotate(-90deg)";fg.style.transformOrigin="50% 50%";
+
+    const txt=document.createElementNS(svg.namespaceURI,"text");
+    txt.setAttribute("x","50%");txt.setAttribute("y","50%");txt.setAttribute("dominant-baseline","middle");
+    txt.setAttribute("text-anchor","middle");txt.setAttribute("fill","white");txt.setAttribute("font-size","34");txt.setAttribute("font-weight","700");
+    txt.textContent="0%";
+
+    const sub=document.createElementNS(svg.namespaceURI,"text");
+    sub.setAttribute("x","50%");sub.setAttribute("y","65%");sub.setAttribute("dominant-baseline","middle");
+    sub.setAttribute("text-anchor","middle");sub.setAttribute("fill","rgba(255,255,255,0.9)");sub.setAttribute("font-size","13");
+    sub.textContent=labelText||"";
+
+    svg.appendChild(bg);svg.appendChild(fg);svg.appendChild(txt);svg.appendChild(sub);
+    container.appendChild(svg);
+
+    const target=Math.max(0,Math.min(100,percent));
+    requestAnimationFrame(()=>{ fg.setAttribute("stroke-dashoffset",circ*(1-target/100)); });
+    const start=performance.now(),dur=900;
+    function tick(now){const t=Math.min(1,(now-start)/dur);txt.textContent=`${Math.round(target*t)}%`;if(t<1)requestAnimationFrame(tick);}
+    requestAnimationFrame(tick);
+  }
+
+  // ── Plan de cursos ──
+  function courseLinksForModule(moduleNum) {
+    const dt=deviceType||"unknown";
+    const candidates=courses.filter(c=>c.module===moduleNum&&(c.devices||[]).includes(dt));
+    return candidates.length>0 ? candidates : courses.filter(c=>c.module===moduleNum);
+  }
+
+  function buildItinerary(moduleScores) {
+    const entries=Object.keys(moduleScores).map(k=>({module:Number(k),score:moduleScores[k]}));
+    const order=m=>(moduleOrder.indexOf(m)===-1?999:moduleOrder.indexOf(m));
+    entries.sort((a,b)=>a.score!==b.score?a.score-b.score:order(a.module)-order(b.module));
+    return entries;
+  }
+
+  // Imágenes de Unsplash por módulo
+  function courseImageUrl(moduleNum) {
+    const base="https://images.unsplash.com/";
+    const map={
+      0:"photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=70",
+      1:"photo-1522125670776-3c7abb882bc2?auto=format&fit=crop&w=800&q=70",
+      2:"photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=70",
+      3:"photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=800&q=70",
+      4:"photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=70",
+      5:"photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=70",
+      6:"photo-1601597111158-2fceff292cdc?auto=format&fit=crop&w=800&q=70",
+      7:"photo-1677442136019-21780ecad995?auto=format&fit=crop&w=800&q=70"
+    };
+    return base+(map[moduleNum]||map[0]);
+  }
+
+  function renderPlan(itinerary) {
+    const container=document.getElementById("planContainer");
+    container.innerHTML="";
+    const noIA=itinerary.filter(x=>x.module!==7);
+    const ia=itinerary.find(x=>x.module===7);
+
+    // ── Primer paso destacado ──
+    const firstStep=noIA[0];
+    if (firstStep) {
+      const fsLinks=courseLinksForModule(firstStep.module);
+      const fsFirst=fsLinks[0];
+      const fsTag=labelForModuleScore(firstStep.score);
+      const fsTitle=fsFirst?fsFirst.name:moduleTitles[firstStep.module];
+      const fsUrl=fsFirst?fsFirst.url:"https://aulavirtual.afundacion.org/igualdad-digital/";
+      const fsDur=fsFirst?fsFirst.duration:"—";
+      const imgUrl=courseImageUrl(firstStep.module);
+      const emoji=MODULE_EMOJI[firstStep.module]||"📱";
+
+      const sec=document.getElementById("firstStepSection");
+      const card=document.getElementById("firstStepCard");
+      sec.classList.remove("hidden");
+
+      card.innerHTML=`
+        <div class="first-step-card">
+          <div class="flex flex-col md:flex-row">
+            <div class="md:w-52 flex-shrink-0 h-36 md:h-auto overflow-hidden relative" style="background:rgba(255,255,255,0.12);">
+              <img src="${imgUrl}" alt="${escapeHtml(fsTitle)}" class="w-full h-full object-cover"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:3.5rem;">${emoji}</div>
+            </div>
+            <div class="p-6 flex flex-col justify-between flex-1">
+              <div>
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-xs font-semibold px-2 py-1 rounded-full" style="background:rgba(255,255,255,0.2);color:white;">${fsTag.badge}</span>
+                  <span class="text-xs" style="color:rgba(255,255,255,0.75);">⏱ ${fsDur}</span>
+                </div>
+                <p class="text-white text-sm font-semibold mb-1" style="opacity:0.85;">Tu primer paso:</p>
+                <p class="text-white text-xl font-normal leading-snug mb-5">${escapeHtml(fsTitle)}</p>
+              </div>
+              <div class="flex flex-col sm:flex-row gap-3">
+                <a href="${fsUrl}" target="_blank"
+                   class="inline-flex items-center justify-center font-semibold py-3 px-6 rounded-xl transition-all"
+                   style="background:white;color:var(--brand-blue);">
+                  Empieza ahora →
+                </a>
+                <button onclick="document.getElementById('planContainer').scrollIntoView({behavior:'smooth'})"
+                        class="inline-flex items-center justify-center font-medium py-3 px-6 rounded-xl transition-all"
+                        style="background:rgba(255,255,255,0.15);color:white;border:1px solid rgba(255,255,255,0.3);">
+                  Ver el resto del plan ↓
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ── Fases (resto de módulos, excluido el primer paso y la IA) ──
+    const rest=noIA.slice(1);
+    const phase1=rest.filter(x=>x.score<=1);
+    const phase2=rest.filter(x=>x.score>1&&x.score<=3);
+    const phase3=rest.filter(x=>x.score>3);
+
+    const blocks=[
+      {title:"🔴 Fase 1 · Refuerza tu base",       items:phase1,hint:"Reforzar estos módulos te dará autonomía rápidamente."},
+      {title:"🟡 Fase 2 · Consolida tu autonomía", items:phase2,hint:"Aquí ganarás seguridad y soltura."},
+      {title:"🟢 Fase 3 · Amplía tus competencias",items:phase3,hint:"Cuando domines lo anterior, este es tu siguiente salto."}
+    ];
+
+    blocks.forEach(block=>{
+      if (block.items.length===0) return;
+      const section=document.createElement("div");
+      section.className="rounded-2xl p-5";
+      section.style.cssText="background:var(--brand-blue-xlight);border:1px solid var(--brand-border);";
+      section.innerHTML=`
+        <h3 class="text-lg font-semibold mb-1" style="color:var(--brand-text);">${block.title}</h3>
+        <p class="text-sm mb-4" style="color:var(--brand-text-muted);">${block.hint}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-items></div>
+      `;
+      const itemsContainer=section.querySelector("[data-items]");
+      block.items.forEach(({module,score})=>{
+        const tag=labelForModuleScore(score);
+        const links=courseLinksForModule(module);
+        const first=links[0];
+        const title=first?first.name:`Curso recomendado — ${moduleTitles[module]}`;
+        const url=first?first.url:"https://aulavirtual.afundacion.org/igualdad-digital/";
+        const dur=first?first.duration:"—";
+        const imgUrl=courseImageUrl(module);
+        const emoji=MODULE_EMOJI[module]||"📱";
+        const cardBg=MODULE_BG[module]||"#f3f8fd";
+
+        const card=document.createElement("a");
+        card.href=url;card.target="_blank";card.className="course-card";
+        card.innerHTML=`
+          <div class="course-img-container" style="background:${cardBg};">
+            <img src="${imgUrl}" alt="${escapeHtml(title)}"
+                 onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+            <div class="course-img-fallback" style="display:none;background:${cardBg};">${emoji}</div>
+          </div>
+          <div class="p-4">
+            <div class="flex items-start justify-between gap-2 mb-2">
+              <span class="font-semibold text-sm leading-snug" style="color:var(--brand-text);">${escapeHtml(title)}</span>
+              <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border flex-shrink-0 ${tag.cls}">${tag.badge}</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-xs" style="color:var(--brand-text-muted);">⏱ ${dur}</span>
+              <span class="text-sm font-semibold" style="color:var(--brand-blue);">Ver curso ↗</span>
+            </div>
+          </div>
+        `;
+        itemsContainer.appendChild(card);
+      });
+      container.appendChild(section);
+    });
+
+    // ── IA extra ──
+    if (ia) {
+      const tag=labelForModuleScore(ia.score);
+      const links=courseLinksForModule(7);
+      const first=links[0];
+      const title=first?first.name:"Inteligencia artificial con ChatGPT";
+      const url=first?first.url:"https://aulavirtual.afundacion.org/igualdad-digital/";
+      const dur=first?first.duration:"3h";
+      const imgUrl=courseImageUrl(7);
+
+      const extra=document.createElement("div");
+      extra.className="rounded-2xl overflow-hidden";
+      extra.style.cssText="border:1.5px solid #c7d2fe;";
+      extra.innerHTML=`
+        <div class="p-5" style="background:#eef2ff;">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <h3 class="text-lg font-semibold" style="color:#3730a3;">✨ Extra · Innovación (IA)</h3>
+              <p class="text-sm mt-1" style="color:#4338ca;">Explora herramientas como ChatGPT cuando quieras ampliar competencias.</p>
+            </div>
+            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold border ${tag.cls}">${tag.badge}</span>
+          </div>
+          <a href="${url}" target="_blank" class="course-card block">
+            <div class="course-img-container" style="background:#e0e7ff;">
+              <img src="${imgUrl}" alt="${escapeHtml(title)}"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+              <div class="course-img-fallback" style="display:none;background:#e0e7ff;">🤖</div>
+            </div>
+            <div class="p-4">
+              <div class="flex items-start justify-between gap-2 mb-2">
+                <span class="font-semibold text-sm leading-snug" style="color:var(--brand-text);">${escapeHtml(title)}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs" style="color:var(--brand-text-muted);">⏱ ${dur}</span>
+                <span class="text-sm font-semibold" style="color:var(--brand-blue);">Ver curso ↗</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      `;
+      container.appendChild(extra);
+    }
+  }
+
+  // ── Render final ──
+  function calculateAndRenderResults() {
+    const moduleScores  = computeModuleScores();
+    const themePercents = computeThemePercents();
+    const weightedPct   = computeWeightedIndexPercent(moduleScores);
+    const level         = determineLevel(weightedPct);
+
+    document.getElementById("resultsIntro").textContent = "Has completado el test. Aquí tienes tu plan personalizado.";
+    renderAnimatedDonut(weightedPct,"Confianza digital");
+    document.getElementById("levelTitle").textContent       = level.title;
+    document.getElementById("levelDescription").textContent = level.desc;
+    renderAnimatedThemeBars(themePercents);
+    renderPlan(buildItinerary(moduleScores));
+  }
+
+  function escapeHtml(str) {
+    return (str||"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+  }
+</script>
+
+</body>
+</html>
